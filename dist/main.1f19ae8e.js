@@ -118,17 +118,69 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"main.js":[function(require,module,exports) {
-'use strict';
+/* how to get the time: use currentTime minus startTime minus stopDuration
+    if stop in between: get stopTime,
+    resume: calculate stopDuration (+=currentTime - stopTime), then start interval
+*/
+var time = document.getElementById('time');
+var startbtn = document.getElementById('start');
+var stopbtn = document.getElementById('stop');
+var resetbtn = document.getElementById('reset');
+var startTime = null;
+var stopTime = null;
+var stopDuration = 0;
+var interval = null;
 
-function counter() {
-  var seconds = 0;
-  setInterval(function () {
-    seconds += 1;
-    document.getElementById('app').innerHTML = "<p>You have been here for ".concat(seconds, " seconds.</p>");
-  }, 1000);
+var printTime = function printTime(millisec, sec, min, hrs) {
+  time.innerHTML = String(hrs).padStart(2, '0') + ":" + String(min).padStart(2, '0') + ":" + String(sec).padStart(2, '0') + ":" + String(millisec).padStart(3, '0');
+};
+
+function start() {
+  if (startTime == null) {
+    //check that clock is not running. NOT RUNNING: get startTime
+    startTime = new Date();
+  }
+
+  if (stopTime != null) {
+    stopDuration += new Date() - stopTime;
+  }
+
+  interval = setInterval(counter, 10);
 }
 
-counter();
+function stop() {
+  stopTime = new Date();
+  clearInterval(interval);
+}
+
+function reset() {
+  stopDuration = 0;
+  startTime = null;
+  stopTime = null;
+  printTime(0, 0, 0, 0);
+  clearInterval(interval);
+}
+
+function counter() {
+  var currentTime = new Date();
+  var timeLapse = new Date(currentTime - startTime - stopDuration);
+  var millisec = timeLapse.getUTCMilliseconds(),
+      sec = timeLapse.getUTCSeconds(),
+      min = timeLapse.getUTCMinutes(),
+      hrs = timeLapse.getUTCHours();
+  printTime(millisec, sec, min, hrs);
+}
+
+printTime(0, 0, 0, 0);
+startbtn.addEventListener("click", function () {
+  return start();
+});
+stopbtn.addEventListener("click", function () {
+  return stop();
+});
+resetbtn.addEventListener("click", function () {
+  return reset();
+});
 },{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -157,7 +209,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "30384" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7249" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
